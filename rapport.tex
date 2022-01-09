@@ -1,0 +1,123 @@
+\documentclass{article}
+\usepackage[french]{babel}
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage{amsmath}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage[T1]{fontenc}
+\newcommand{\hmwkTitle}{TP1}
+\newcommand{\hmwkDueDate}{26 octobre 2021}
+\newcommand{\hmwkClass}{\ \ Concepts des langages de programmation }
+\newcommand{\hmwkClassTime}{}%Section 
+\newcommand{\hmwkClassInstructor}{Professeur :  Stefan Monnier}
+\newcommand{\hmwkAuthorName}{\textbf{Auriane Egal, 20123018 et Jiadi Yu, 20189854}}
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Pour\ le\ \hmwkDueDate}\\
+    \vspace{0.1in}\large{\textit{\hmwkClassInstructor\ \hmwkClassTime}}
+    \vspace{3in}
+}
+\author{\hmwkAuthorName}
+\date{}
+
+\begin{document}
+\maketitle
+\newpage
+
+
+% Problèmes rencontrés :
+\section{Problèmes rencontrés :}
+\vspace{0.5cm}
+
+\subsection{Avant de coder}
+
+
+La lecture de l'énoncer a été assez compliqué avant de bien tout comprendre (comme écrit dans l'énoncer), car il y a pleins de notions à assimiler sur un langage assez complexe. Savoir si c'était du code ou non, mais surtout de s'habituer à ce nouveau langage qu'on voulait créer en faisant une copie. Le forum a été d'une grande utilité pour avoir de meilleurs exemples et mieux comprendre les cas en détail.
+
+Dans un premier temps, on a décidé de faire s2l pour pouvoir mieux comprendre comment aller fonctionner les expressions du code à évaluer avec eval. Puis on a fini par coder les deux fonctions en même temps, ce qui a permis de limiter certains cas qu'on aurait pu oublier.
+
+\subsection{Fonction s2l}
+
+
+Les principaux problèmes rencontrés ont été de comprendre quand mettre Lcons et comment mettre Lcase. Lcons prend un tag, soit une chaîne de caractère qui permet un constructeur de donnée. C’est-à-dire créer une nouvelle donnée donc un tag qui varie à chaque fois, donc qui n'est pas réellement dans une écriture "basique" d'un langage de programmation. Lcase doit prendre 3 arguments, ce qui est assez délicat à manipuler en termes de code. Car souvent on doit séparer les arguments à l'intérieur même de l'expression.
+
+Au début, on a décidé d’utiliser un cas général et traiter les Lexp directement avec s2l, mais après l'avoir fait s2l ne fonctionnait plus quand il y a plusieurs fonctions dans une phrase.
+
+Après, on traite directement les Sexps donne par readSexp, mais pour les cas de let, la phrase est tellement longue avec plusieurs phrases et la syntaxe est pas mal différente à diviser. Aussi pour les Lcase, pour la raison qu’on n’a pas bien compris le structure de Lcase, on ne peut pas bien généraliser la syntaxe de Lcase.
+\subsection{Fonction eval}
+
+
+Parmi les problèmes rencontrés, la première partie a été la compréhension des deux environnements. Principalement comprendre leurs fonctionnements et savoir la différence entre les deux. Car rien n'est inscrit dans l'énoncer sur ce sujet de pourquoi il y en a plusieurs. Mais la notation dans le code source nous a permis de comprendre qu'il s'agissait d'une part d'un environnement pour les "lexical" et l'autre pour le "dynamic". Mais après la gestion des environnements a été aussi compliqué pour savoir comment arriver à prendre et à stoker les variables dans l'un des deux.
+
+Puis ce qui nous a pris le plus de temps est la fonction anonyme Lambda, vu qu’il n'y a pas de Value de type de Lambda comme le ex4.5, on ne peut pas ajouter une nouvelle case dans eval Lpipe x y et la traiter directement.
+
+Après avoir géré le problème du Lambda, nous avons trouvé que dlet et slet sont traités toujours de la même façon. Nous avons cru qu'il y avait un problème de modification des environnements originale, car on a changé que les tags et l'environnement. Qui fait qu'on a changé les deux fonctions :(new:senv denv) ou (senv new:denv). Au début, on a essayé de changer la syntaxe Lexp que s2l va donner, mais ça n’a pas marché. Ensuite on a essayé de changer la séquence des deux environnements et jouer avec les paramètres dans les fonctions.
+
+\newpage
+
+% Choix qu'on a fait :
+\section{Choix qu'on a fait :}
+\vspace{0.5cm}
+
+\subsection{La façon de travailler ensemble}
+
+
+Au début, nous avons choisi de travailler ensemble en personne, mais dû à nos conflits d'horaires avec nos emplois du temps, nous avons dû choisir de diviser le travail au lieu de programmer en binôme à l'aide de Github.
+\subsection{Fonction s2l}
+
+
+Parmi les choix qu'on a du décider, on a choisi de faire un pattern matching pour chaque cas des expressions comme slet, dlet, lambda, etc. Précisément on traite directement les formes Sexp des phrases donne par readSexp, et parmi eux les plus compliques sont dlet et slet car il y a tant beaucoup de situations à traiter, on l'a généralisé dans 4 cas qui contient probablement tous les cas possibles puis traiter les phrase à l'intérieur de façon récursive. Mais on n'est pas arrivé à bien comprendre le Case, donc on a utilisé une manière relativement moins générale pour la traiter, y compris les deux cas dans le fichier exemples.slip.
+
+Ensuite, pour lambda qui peut avoir d'autres portées globales que dans la deuxième expression (Scons (Ssym "lambda") e1 e2), on a utilisé une fonction listMaker. Elle sert à mettre dans une liste toutes les expressions qui vont être utilisées, puis une fonction list2lambda pour sortir les éléments de listMaker un par un et mettre le s2l des dernières expressions dans la parenthèse intérieure, de sorte que si la dernière expression est autre chose que Snum ou Ssym. Puis elle sera récursivement s2l à nouveau, cela est aussi utilisé dans s2l des deux lets quand il y a des fonctions là-dedans. Pour les deux, lets on n'a change que les BindingTypes.
+\subsection{Fonction eval}
+
+
+Pour les Lvar, on applique eval de manière chercher le var dont on a besoin dans l'environnement, et pour les deux cas (dynamique et statique), on les cherche dans l'environnement différent.
+
+Pour l'évaluation de Vfn qui est relativement un peu "tricky" comparée aux autres, car on ne peut pas l'analyser directement. Des fois il y a les Lexp qu'on ne peut pas traiter directement par exemple Lvar"x", donc il faut le remettre plus tard, inspire par Monsieur Genier et les exercices hebdomadaire, on a utilisé la fonction anonyme à l'intérieur de Vfn qui reçoit un environnement et un Value qu'on peut remettre plus tard avec les autres Lexp dans Lpipe. 
+
+Pour les lets, ce qu'on a fait est simplement de modifier l'environnement différent qu'il utilise (Statique et Dynamique).
+
+% Options qu’on a sciemment rejetées :
+\newpage
+\section{Options qu’on a sciemment rejetées :}
+\vspace{0.5cm}
+
+\subsection{Fonction s2l}
+
+
+Au début on a créé des méthodes lSyntax pour changer directement la syntaxe de readSexp "(phrase)" et ensuite utiliser lSyntax dans la fonction s2l. Mais il s’est avéré que s2l ne fonctionne pas parfaitement avec de multiples fonctions (dlet slet, etc.).
+
+\subsection{Fonction eval}
+
+
+Pour le cas Lambda, on avait créé un nouveau Value qui s'appelle Vlambda comme ex4.5, mais pour le réaliser il faut toucher les autres codes que monsieur Monnier a déjà faits et ça fonctionne que pour l'exemple (2(lambda (x) x)) et on n'a pas arrivé a le bien hère. Ensuite on a décidé d’ajouter un nouveau cas pour eval Lpipe, mais c'est la même situation qu'on ajoute un nouveau Data Type. Ce qui fait qu'on a abandonné cette façon de faire.
+
+%\subsection{Dans le code}
+%
+% L'énoncer demande faire moins de 80 colonnes de code. Or puisque nous pouvons pas régler ce problème de colonnes nous les dépassons.
+%
+%
+
+\vspace{1.2cm}
+
+
+% Surprises :
+\section{Surprises :}
+\vspace{0.5cm}
+
+\subsection{Durant la lecture du sujet}
+Quand on a vu la syntaxe du langage Slip, ça ressemblait beaucoup à Haskell. C'était le cas lorsque la phrase n'était pas trop compliquée et courte. Puisque les appels de fonctions ou les formes syntaxiques sont écrites sous forme de liste en Slip, lorsque le texte devient long et comprend beaucoup de fonctions, il devient difficile de distinguer la séquence des fonctions et des expressions. Il était donc difficile de mieux saisir le langage.
+
+De plus, on a découvert qu'on pouvait écrire nos fonctions sous forme d'une Sexp via le code. Donc cela nous à faciliter certaines manipulations ainsi qu'aider à comprendre comment se former les tuples.
+
+\subsection{Fonction s2l}
+Nous n'avons pas réalisé que nous devions faire une récursion pour chaque argument dans une phrase. Par exemple dans (Scons e1 e2) au début, nous devons donner chaque cas de e1 et e2 parce qu'ils ne sont pas nécessairement un sous la forme de (Lnum x) ou (Lvar y).
+
+Aussi, pour les dlet et slet, il y a de la situation assez complique et longues à traiter y peut contenir beaucoup de fonctions et expressions.
+
+\subsection{Fonction eval}
+Dans cette fonction, l’utilisation de lambda fonctions dans Vfn n'est pas prévu par nous, car Vfn peut représente tous les deux fonctions normaux et fonctions anonymes, c'est un peu différent des exercices précédents. Aussi la différence de l'environnement de dlet et slet n'est pas bien prévu non plus.
+
+
+\end{document}

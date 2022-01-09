@@ -1,0 +1,43 @@
+;;; Quelques exemples.                                  -*- coding: utf-8 -*-
+
+;;; D'abord quelques exemples sans sucre syntaxique ni récursion.
+
+666                                     ; ↝ 666
+
+-                                       ; ↝ <function>
+
+(12(((61 (3 *))+)))                     ; ↝ 195
+
+(7 (lambda (z) (z)))                    ; ↝ 7
+
+(12(48(lambda (x) (lambda (y) (y (x /))))))  ; ↝ 4
+
+(cons cons 2 3)                         ; ↝ [cons 2 3]
+(cons nil 2 3 3 12 2)                   ; ↝ [nil]
+
+
+;;;----------------------------------------------------------------+
+;;;(case (cons cons 3 12) ((nil) 1) ((cons x y) (y (x +)))) ; ↝ 15 |
+;;;(case (cons cons 1 2)  ((nil) 1) ((cons x y) (y (x +)))) ; ↝ 3  |   ;;;Ne pas avoir arrivéé
+;;;(case (cons cons 1 2)  (_ 1)     ((cons x y) (y (x +)))) ; ↝ 1  |
+;;;----------------------------------------------------------------+
+
+(if (5 (4 >)) 13 16)                      ; ↝ 16
+
+(if (1 (4 >)) 3 9)                        ; ↝ 3
+
+(slet ((y 3)) y)                        ; ↝ 3
+
+(dlet (((f x y) (y ((5 (x +)) *)))) (9 (4 f))) ; ↝ 81
+
+(dlet (((fact n)(if (2 (n <=)) n (((1 (n -)) fact) (n *))))) (4 fact))                                    ; ↝ 24
+
+;;Différence entre dynamique et statique
+(slet (((curried+ x1) (slet ((x x1)) (lambda (y) (y (x +)))))(x 99))(13 (12 curried+)))                      ; ↝ 25
+(dlet (((curried+ x1) (dlet ((x x1)) (lambda (y) (y (x +)))))(x 99))(13 (12 curried+)))                      ; ↝ 112
+
+;;;(slet (((fact n)(if (1 (n <=)) n (((2 (n -)) fact) (n *)))))(9 fact))                                    ; ↝ error
+
+(dlet (((fact n)(if (1 (n <=)) n (((2 (n -)) fact) (n *)))))(9 fact))                                    ; ↝ 945
+
+(slet (((Y f)(lambda (n)(slet ((f1 (lambda (x n) (n ((lambda (n) (n (x x))) f)))))(n (f1 f1)))))((fact fact1 n)(if (1 (n <=)) n (((1 (n -)) fact1) (n *)))))(7 (fact Y)))  ; ↝ 5040;
